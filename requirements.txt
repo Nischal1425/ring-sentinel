@@ -1,0 +1,11 @@
+# The detector needs three of these. pandas is only for the external benchmark.
+#
+# Pinned to what this was built and measured against on 2026-09-02. Nothing
+# here is exotic: no torch, no networkx, no GNN framework, no LLM client.
+numpy==2.2.6
+scipy==1.16.1
+scikit-learn==1.7.1
+pandas==2.3.3          # bench_elliptic2.py only
+
+# Not required. sentinel/razorpay.py talks to the API with stdlib urllib, and
+# the whole offline pipeline runs on the standard library plus the above.
