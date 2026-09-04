@@ -35,8 +35,8 @@ demo/_manim/
 #   python demo/make_video.py      -> frames/*.png, the narration, the .mp4
 demo/frames/
 demo/clips/
-demo/ring-sentinel-pitch.ass
-demo/ring-sentinel-pitch.srt
+ring-sentinel-pitch.ass
+ring-sentinel-pitch.srt
 demo/_segments/
 
 # The scripts that build the video. They stay on the author's machine: the

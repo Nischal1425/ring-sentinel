@@ -34,15 +34,6 @@ Most of those 129 payments are ordinary sales. Not one is individually unusual
 enough for a per-payment model to flag. That gap is the product, and
 `test_pipeline.py` asserts it rather than claiming it.
 
-
-## Watch the pitch
-
-[![Ring Sentinel — the pitch](demo/pitch-poster.png)](demo/ring-sentinel-pitch.mp4)
-
-**[demo/ring-sentinel-pitch.mp4](demo/ring-sentinel-pitch.mp4)** — 4 minutes 37
-seconds. Every figure spoken in it is read out of this repository at build time,
-so the video and the code cannot disagree.
-
 ---
 
 ## Why this, for Razorpay
