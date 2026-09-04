@@ -6,29 +6,42 @@ One class of loss: **coordinated abuse rings** — mule networks, refund mills a
 collusive merchant clusters that are invisible one payment at a time.
 
 ```
-  R0003 · 9 accounts · 618 payments · Rs 37,38,706.94 exposure            90
+  R0007 · 9 accounts · 129 payments · Rs 25,89,571.29 exposure            98
 
-  All 9 accounts were opened within 4 days of each other, against 1,188
-    days expected for 9 accounts picked at random from this book. They
-    were onboarded as a batch, the newest 31 days before the window opened.
-  90% of this group's activity falls on days the rest of the book was
-    quiet - concentrated on day 179, not spread like normal trading.
-  36 of 36 possible links between the 9 accounts are present (100%
-    dense) - they are connected to each other, not merely to a common
-    third party.
-  On its busiest days 100% of the 9 accounts transacted together.
+  Refunds run 10.0x the portfolio rate (53 of 129 payments, lower-
+    bound estimate) - money arrives and leaves again rather than being
+    earned.
+  97% of this group's activity falls on days the rest of the book was
+    quiet - concentrated on day 94, not spread like normal trading.
+  All 9 accounts were opened within 69 days of each other, against
+    1188 days expected for 9 accounts picked at random from this book.
+    They were onboarded as a batch, the newest 73 days before the window
+    opened.
+  One account sits at the centre of 100% of the links, and what it
+    shares with the others is identity, not infrastructure. A
+    marketplace shares an IP with its sellers; it does not put them on
+    its own settlement account or device.
+  On its busiest days 96% of the 9 accounts transacted together.
     Independent merchants do not share a calendar.
-
-  A batch signup is not an offence on its own - a chain opening several
-    outlets at once looks the same. It is evidence only alongside what
-    these accounts share and how they behave.
+  A batch signup is not an offence on its own - a chain opening
+    several outlets at once looks the same. It is evidence only
+    alongside what these accounts share and how they behave.
 
   Innocent explanations considered: none fitted.
 ```
 
-Most of those 618 payments are ordinary sales. Not one is individually unusual
+Most of those 129 payments are ordinary sales. Not one is individually unusual
 enough for a per-payment model to flag. That gap is the product, and
 `test_pipeline.py` asserts it rather than claiming it.
+
+
+## Watch the pitch
+
+[![Ring Sentinel — the pitch](demo/pitch-poster.png)](demo/ring-sentinel-pitch.mp4)
+
+**[demo/ring-sentinel-pitch.mp4](demo/ring-sentinel-pitch.mp4)** — 4 minutes 37
+seconds. Every figure spoken in it is read out of this repository at build time,
+so the video and the code cannot disagree.
 
 ---
 
@@ -761,43 +774,3 @@ then it wraps `open()` and runs the whole pipeline, asserting the label file is
 touched zero times. The grep alone was not enough — an adversarial probe reading
 `'tr' + 'uth.csv'` walked straight past it, which is why the runtime check
 exists.
-
-
-## The pitch video, and why it is generated
-
-`demo/` builds the five-minute pitch as a program, not as a screen recording.
-There is no take to re-perform: every frame is rendered headlessly and the whole
-video is reproducible from the repository.
-
-```
-pip install -r demo/requirements-video.txt    # manim + a TTS model; needs ffmpeg
-python demo/facts.py           # derive every figure the animations quote
-python demo/build_frames.py    # frames + narration, from the live pipeline
-python demo/render_scenes.py   # the manim animations
-python demo/make_video.py      # narrate, stitch, write the .srt
-```
-
-Those dependencies are deliberately in their own file. The detector needs numpy,
-scipy and scikit-learn and nothing else; nothing under `sentinel/` imports any
-of the video toolchain.
-
-The reason is the same one that runs through the rest of this README. **A number
-typed into a slide goes stale the next time the data is regenerated, and nobody
-notices until it is on screen.** So no figure in the video is typed by hand. The
-narration is generated next to the frame that shows it, both read from the same
-pipeline run, and they cannot disagree.
-
-That property caught two real errors. The explainer animation had six merchant
-names hardcoded into it, described as a ring sharing one device and one IP;
-after a data regeneration those names resolved to unrelated *legitimate*
-merchants, and the actual top ring shares neither. And a script written by hand
-still claimed a ring id and a payment count that had not existed for four
-regenerations. Both are now read out of `data/` at build time.
-
-The narration is 817 words over 22 beats. `demo/SCRIPT.md` is its
-transcript and is also generated — editing it by hand only creates drift.
-`demo/ring-sentinel-pitch.srt` carries the captions; the video itself has no
-subtitle track, so nothing is burned over the frames.
-
-The rendered `.mp4`, the frames and the manim clips are all gitignored. They are
-output, not source, and the four commands above rebuild them.
