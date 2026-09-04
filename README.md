@@ -770,11 +770,16 @@ There is no take to re-perform: every frame is rendered headlessly and the whole
 video is reproducible from the repository.
 
 ```
+pip install -r demo/requirements-video.txt    # manim + a TTS model; needs ffmpeg
 python demo/facts.py           # derive every figure the animations quote
 python demo/build_frames.py    # frames + narration, from the live pipeline
 python demo/render_scenes.py   # the manim animations
 python demo/make_video.py      # narrate, stitch, write the .srt
 ```
+
+Those dependencies are deliberately in their own file. The detector needs numpy,
+scipy and scikit-learn and nothing else; nothing under `sentinel/` imports any
+of the video toolchain.
 
 The reason is the same one that runs through the rest of this README. **A number
 typed into a slide goes stale the next time the data is regenerated, and nobody
