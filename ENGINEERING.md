@@ -312,18 +312,11 @@ the attribute graph must still miss these rings without it (0/5 → 5/5).
 
 ## Architecture
 
-```
-merchants.csv ─┐                                    ┌── structural  shape
-               ├─► graph ─► df cap ─► 2-core ─► ring│── velocity    timing
-transactions ──┘   (paise)  (the      (strip    ────│── identity    names
-                            big step)  strays)      └── money       flows
-                                                             │
-                                              fuse (noisy-OR)│
-                                                             ▼
-                                          verify ──► case file ──► respond
-                                     (may only        report.html   (notes only)
-                                      subtract)
-```
+![Ring Sentinel architecture — merchants and transactions in, graph build, group scoring, verification, action ladder](architecture.png)
+
+*Payments enter at the top. Note where the split happens: below "Ring candidate"
+nothing is scored per payment any more — every signal, the verifier and the whole
+action ladder operate on a **group**.*
 
 | File | Job |
 |---|---|
