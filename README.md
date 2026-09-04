@@ -2,8 +2,136 @@
 
 **Razorpay AI Buildathon — AI Risk Manager**
 
-One class of loss: **coordinated abuse rings** — mule networks, refund mills and
-collusive merchant clusters that are invisible one payment at a time.
+Catches fraud **rings** — groups of merchant accounts run by one operator —
+that are invisible when you check payments one at a time.
+
+---
+
+## The problem, with a real example
+
+One operator opens **nine merchant accounts**. Over six months they push
+**129 payments** through them, typically around ₹33,000 each — and **53 of
+those payments are refunds**, sending the money straight back out again.
+**₹25.9 lakh** passes through in total.
+
+Here is how that looks to a fraud system that scores payments:
+
+- Look at **any single payment** — an ordinary ₹33,000 sale. Nothing wrong.
+- Look at **any single account** — an ordinary small business. Nothing wrong.
+
+Razorpay already scores payments one at a time, and that model is good. But it
+is asked one question at a time: *is this payment fine?* For these accounts the
+honest answer is always **yes**. Hundreds of correct answers in a row, and the
+ring walks straight through.
+
+**The fraud is not inside any payment. It is in what connects the accounts:**
+
+| what they share | why it matters |
+|---|---|
+| 3 of the 9 settle into the **same bank account** | separate businesses do not share a bank account |
+| 3 sign in from the **same device** | separate businesses do not share a laptop |
+| all 9 **opened within 69 days** | accounts picked at random from this book spread over 1,188 days — they were onboarded as a batch |
+| **53 of 129 payments are refunds** | ten times the rest of the book's refund rate — money arrives and leaves rather than being earned |
+
+Any one of those has an innocent explanation. All four together, on the same
+nine accounts, does not.
+
+---
+
+## What Ring Sentinel does
+
+1. **Joins accounts that share something** — a bank account, a device, a phone,
+   a UPI address, near-identical names, or a habit of trading on the same days.
+2. **Scores each group**, not each payment, on five kinds of evidence: who they
+   are, how the money moves, the shape of the connections, how old the accounts
+   are, and when they trade.
+3. **Argues against itself.** A second component tries to talk the score *down* —
+   is this just a franchise chain? a marketplace? a family business? It can only
+   ever lower a score, never raise one.
+4. **Writes a case file, not a score.** Every flag says in plain English what
+   linked the accounts and which innocent explanations were considered and
+   rejected, so a merchant can argue back.
+
+## Does it work?
+
+Measured on a **held-out half of the data that the thresholds were never tuned
+on** — the equivalent of a closed-book exam:
+
+| | result | meaning |
+|---|---|---|
+| Fraud rings caught | **20 of 22** | 90.9%, 95% confidence 72–98% |
+| Of the groups it flagged, genuinely fraud | **20 of 23** | 87.0% |
+| Innocent lookalike groups wrongly flagged | **0 of 10** | the decoys in this half — 0 of 20 across the whole book |
+| Innocent merchants caught in a flagged group | **12 of 147** | the number that maps to a real person |
+
+That last row matters more than the one above it. "Zero decoys flagged" only
+counts the *planted* legitimate groups; eleven of those twelve innocents are
+ordinary unaffiliated merchants that the decoy metric never looks at.
+
+## The part that is actually hard
+
+Not finding rings. **Not flagging honest businesses that look exactly like one.**
+
+So the data contains twenty *decoy* groups — legitimate merchants planted
+specifically to trip the detector:
+
+- a **franchise chain** where every outlet settles into one head-office account
+- a **family business** where three shops share one laptop
+- a **marketplace** whose sellers all appear behind its IP address
+- ordinary merchants **all busy at once for Diwali**
+- a brand **opening six outlets in one week** — which looks precisely like a
+  batch of mules being onboarded
+
+None of the twenty were flagged. A detector that flags a franchise has not
+understood the problem.
+
+## What it is allowed to do to a merchant
+
+Deliberately, almost nothing. There are four actions and this is all of them:
+
+| action | effect |
+|---|---|
+| `OBSERVE` | logged, nothing else |
+| `WATCH` | flagged internally, nobody is notified |
+| `REVIEW` | queued for a human, with the evidence attached |
+| `HOLD_SETTLEMENT` | settlement moves T+2 → T+3, **expires by itself in 24 hours** |
+
+**There is no freeze, no block and no account closure in this codebase.** Not
+disabled behind a flag — the functions do not exist, and a test asserts they
+never appear. The worst thing this system can do to an honest merchant is make
+them wait one day.
+
+## Why a ring detector, and not a better payment model
+
+Razorpay already has a transaction-level fraud model — press coverage in August
+2026 describes "Vulcan", an in-house model scoring payments across merchants.
+That is trade press rather than Razorpay documentation, so treat it as reported
+rather than confirmed. The argument does not depend on the details: **a better
+per-payment classifier competes with whatever Razorpay already runs. A ring
+detector does not.** It is a different data structure, not a better model.
+
+The second gap is **evidence**. Public merchant reviews describe accounts
+disabled "without specific reasons or evidence" and settlements held for long
+periods. Those are public web sources and worth verifying before quoting on
+stage — but they point at something real. A score cannot be argued with. A case
+file can.
+
+## Words used in this README
+
+| term | meaning |
+|---|---|
+| **ring** | a group of merchant accounts run by one operator |
+| **the book** | the whole portfolio — 1,550 merchants and 199,361 payments over six months |
+| **decoy** | a *legitimate* group planted in the data to look suspicious, to test for false positives |
+| **tune / test** | the data is split in two. Thresholds are chosen on `tune`. `test` is held out and read once |
+| **recall** | of the fraud rings that exist, how many were found |
+| **precision** | of the groups flagged, how many were really fraud |
+| **exposure** | money that passed through a ring — what is at risk, not what is proven stolen |
+| **case file** | the evidence written for each flagged group, in plain English |
+
+---
+
+## The example above, as the system actually prints it
 
 ```
   R0007 · 9 accounts · 129 payments · Rs 25,89,571.29 exposure            98
@@ -30,34 +158,14 @@ collusive merchant clusters that are invisible one payment at a time.
   Innocent explanations considered: none fitted.
 ```
 
-Most of those 129 payments are ordinary sales. Not one is individually unusual
-enough for a per-payment model to flag. That gap is the product, and
-`test_pipeline.py` asserts it rather than claiming it.
+`98` is the ring's score, against a review threshold of 70. Every line above is
+generated by the detector, not written by hand.
 
 ---
 
-## Why this, for Razorpay
-
-**Razorpay already has a transaction-level fraud model.** Press coverage in
-August 2026 describes "Vulcan", an in-house model scoring payments across
-merchants. Sourced from trade press rather than Razorpay documentation, so
-treat it as reported rather than confirmed — but the argument does not depend
-on the details: a per-payment classifier competes with whatever the incumbent
-scorer is, and a ring detector does not.
-
-A ring is invisible in any single payment. It exists only in the joins between
-accounts — the shared settlement account, the reused device, the names that
-differ by one folded character. That is the gap, and it is a different data
-structure, not a better model.
-
-**The second gap is evidence.** Public merchant reviews describe accounts
-disabled "without specific reasons or evidence" and settlements held for long
-periods, and Razorpay's own marketing cites a reduction in false positives —
-both from public web sources, both worth verifying before quoting on stage. So
-the deliverable here is not a
-score. It is a **case file**: what linked these accounts, what the five signals
-said, which innocent explanations were considered and rejected, which gate
-stopped the action, and how to reverse it.
+**Everything below is the engineering detail** — how the graph is built, what
+each signal contributes, the benchmark it loses, and the bugs found along the
+way. The sections above are the submission; the rest is the working.
 
 ---
 
