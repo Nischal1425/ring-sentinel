@@ -761,3 +761,38 @@ then it wraps `open()` and runs the whole pipeline, asserting the label file is
 touched zero times. The grep alone was not enough — an adversarial probe reading
 `'tr' + 'uth.csv'` walked straight past it, which is why the runtime check
 exists.
+
+
+## The pitch video, and why it is generated
+
+`demo/` builds the five-minute pitch as a program, not as a screen recording.
+There is no take to re-perform: every frame is rendered headlessly and the whole
+video is reproducible from the repository.
+
+```
+python demo/facts.py           # derive every figure the animations quote
+python demo/build_frames.py    # frames + narration, from the live pipeline
+python demo/render_scenes.py   # the manim animations
+python demo/make_video.py      # narrate, stitch, write the .srt
+```
+
+The reason is the same one that runs through the rest of this README. **A number
+typed into a slide goes stale the next time the data is regenerated, and nobody
+notices until it is on screen.** So no figure in the video is typed by hand. The
+narration is generated next to the frame that shows it, both read from the same
+pipeline run, and they cannot disagree.
+
+That property caught two real errors. The explainer animation had six merchant
+names hardcoded into it, described as a ring sharing one device and one IP;
+after a data regeneration those names resolved to unrelated *legitimate*
+merchants, and the actual top ring shares neither. And a script written by hand
+still claimed a ring id and a payment count that had not existed for four
+regenerations. Both are now read out of `data/` at build time.
+
+The narration is 817 words over 22 beats. `demo/SCRIPT.md` is its
+transcript and is also generated — editing it by hand only creates drift.
+`demo/ring-sentinel-pitch.srt` carries the captions; the video itself has no
+subtitle track, so nothing is burned over the frames.
+
+The rendered `.mp4`, the frames and the manim clips are all gitignored. They are
+output, not source, and the four commands above rebuild them.

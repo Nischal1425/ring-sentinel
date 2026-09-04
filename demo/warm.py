@@ -1,20 +1,23 @@
-"""Run this ONCE before recording. It removes every way the demo can glitch.
+"""Run this ONCE before demonstrating the system live. It removes every way a
+walkthrough can glitch.
 
     python demo/warm.py
 
-What can go wrong on camera, and what this does about it:
+The pitch video itself is not recorded live - demo/build_frames.py and
+demo/make_video.py render it headlessly. This script is for the other case:
+driving the system in front of someone, in a terminal.
 
-  * A cold import pauses for 2-3 seconds mid-take. This imports everything
-    first, so every command in the recording starts instantly.
+What goes wrong when you do that, and what this does about it:
+
+  * A cold import pauses for 2-3 seconds mid-sentence. This imports everything
+    first, so every command starts instantly.
   * `run.py` on a fresh checkout dies with "No data yet". This regenerates it.
-  * Hysteresis means NOTHING is held on the first run, so a demo of the action
-    ladder shows an empty column. This primes the state so the ladder is
-    populated when you record.
+  * Hysteresis means NOTHING is held on the first run, so the action ladder
+    shows an empty column. This primes the state so the ladder is populated.
   * The live Razorpay account may be empty or stale. This checks it and tells
     you whether to re-seed BEFORE you start, not during.
 
-Then it prints the exact command for each beat of demo/SCRIPT.md, so you are
-never typing from memory while recording.
+It then prints a running order, so you are never typing from memory.
 """
 
 from __future__ import annotations
@@ -93,24 +96,25 @@ def main():
     ])
 
     print(f"\n{BAR}")
-    print("  COMMANDS, IN ORDER. Copy one per beat.")
+    print("  RUNNING ORDER. One command per step.")
     print(BAR)
-    for beat, what, cmd in [
-        ("1", "open the case file",       "start report.html"),
-        ("2", "the 30-second explainer",  "start demo\\ring.html   (space to advance)"),
-        ("3", "held-out results",         "python score.py"),
-        ("4", "the decoys",               "  ...same output, scroll to DECOYS"),
-        ("5", "live Razorpay API",        "python live.py --annotate"),
-        ("6", "the two things that lost", "python bench_ml.py   /   python bench_elliptic2.py"),
-        ("7", "the checks and the ladder", "python test_pipeline.py"),
+    for step, what, cmd in [
+        ("1", "open the case file",        "start report.html"),
+        ("2", "the 30-second explainer",   "start demo\\ring.html   (space to advance)"),
+        ("3", "held-out results",          "python score.py"),
+        ("4", "the decoys",                "  ...same output, scroll to DECOYS"),
+        ("5", "what each signal is worth", "python ablate.py"),
+        ("6", "live Razorpay API",         "python live.py            (add --annotate to write)"),
+        ("7", "the two things that lost",  "python bench_ml.py   /   python bench_elliptic2.py"),
+        ("8", "the checks and the ladder", "python test_pipeline.py"),
     ]:
-        print(f"  beat {beat}  {what:26} {cmd}")
+        print(f"  step {step}  {what:26} {cmd}")
 
     print(f"\n{BAR}")
     if ok:
-        print("  Ready. Set your terminal to 18pt or larger before you hit record.")
+        print("  Ready. Set your terminal to 18pt or larger before you share the screen.")
     else:
-        print("  Something above FAILED. Fix it before recording, not during.")
+        print("  Something above FAILED. Fix it before you start, not during.")
     print(BAR)
     return 0 if ok else 1
 
