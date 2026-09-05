@@ -7,8 +7,6 @@ looks normal. Every account looks normal. Only the *group* looks wrong.
 
 Ring Sentinel finds the group.
 
-📹 `ring-sentinel-pitch.mp4` — 4 minute walkthrough.
-
 ## The problem
 
 One operator. Nine merchant accounts. Six months. ₹25.9 lakh moved through them,
@@ -25,6 +23,13 @@ inside a payment. It is in what links the accounts:
 
 Each of those has an innocent explanation on its own. All four, on the same nine
 accounts, does not.
+
+## Watch it work
+
+https://github.com/user-attachments/assets/6be1bb91-cd8e-4235-81f2-d09ac16d2856
+
+Four minutes. Every figure spoken in it is read out of this repository at build
+time, so the video and the code cannot disagree.
 
 ## What it does
 
